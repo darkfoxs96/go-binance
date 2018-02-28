@@ -71,7 +71,7 @@ func (m *MarketOrder) ValidateMarketOrder() error {
 // Input for: GET & DELETE /api/v3/order
 type OrderQuery struct {
 	Symbol     string
-	OrderId    int64
+	OrderId    string
 	RecvWindow int64
 }
 
@@ -79,7 +79,7 @@ func (q *OrderQuery) ValidateOrderQuery() error {
 	switch {
 	case len(q.Symbol) == 0:
 		return errors.New("OrderQuery must contain a symbol")
-	case q.OrderId == 0:
+	case q.OrderId == "":
 		return errors.New("OrderQuery must contain an OrderId")
 	case q.RecvWindow == 0:
 		q.RecvWindow = 5000

@@ -19,6 +19,7 @@ var OrderTypeEnum = map[string]bool{
 var OrderTIFEnum = map[string]bool{
 	"GTC": true,
 	"IOC": true,
+	"FOK": true,
 }
 
 var IntervalEnum = map[string]bool{
