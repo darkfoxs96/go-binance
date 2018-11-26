@@ -23,6 +23,7 @@ const (
 var (
 	keyUserData       = ""
 	userDataStreamUrl = fmt.Sprintf("api/v1/userDataStream") // TODO: delete
+	clientGoBinance *goBinance.Client
 )
 
 // NewUserWSChannel POST /api/v1/userDataStream
@@ -30,7 +31,7 @@ func (c *Binance) NewUserWSChannel() (err error,
 								      accountUpdate chan *WSAccountUpdate,
 									  orderUpdate chan *WSOrderUpdate,
 									  done chan struct{}) {
-	clientGoBinance := goBinance.NewClient(c.client.key, c.client.secret)
+	clientGoBinance = goBinance.NewClient(c.client.key, c.client.secret)
 	clientGoBinanceWS := clientGoBinance.NewStartUserStreamService()
 
 	keyUserData, err = clientGoBinanceWS.Do(emptyContext{})
@@ -46,14 +47,20 @@ func (c *Binance) NewUserWSChannel() (err error,
 		return
 	}
 
-	done = make(chan struct{})
-	accountUpdate = make(chan *WSAccountUpdate, 2)
-	orderUpdate = make(chan *WSOrderUpdate, 2)
+	done = make(chan struct{}, 2)
+	accountUpdate = make(chan *WSAccountUpdate, 10)
+	orderUpdate = make(chan *WSOrderUpdate, 10)
 
 	go func() {
-		defer close(done)
+		defer func() {
+			close(done)
+			close(accountUpdate)
+			close(orderUpdate)
+			c.StopUserWSChannel()
+		}()
 
-		fmt.Println("Binance userData start =>>>>>>")
+		fmt.Println("Binance start userData stream =>>>>>>")
+
 		for {
 			_, b, err := conn.ReadMessage()
 			if err != nil {
@@ -61,12 +68,12 @@ func (c *Binance) NewUserWSChannel() (err error,
 				continue
 			}
 
-			fmt.Printf("Binance ws recv: %s", string(b))
+			fmt.Printf("Binance ws recv: %s", string(b)) // TODO: Delete row
 
-			var accountUp *WSAccountUpdate
+			accountUp := &WSAccountUpdate{}
 			err = json.Unmarshal(b, accountUp)
 			if err != nil {
-				var orderUp *WSOrderUpdate
+				orderUp := &WSOrderUpdate{}
 				err = json.Unmarshal(b, orderUp)
 				if err != nil {
 					fmt.Printf("Binance ws read: not found structures, error: " + err.Error())
@@ -80,17 +87,37 @@ func (c *Binance) NewUserWSChannel() (err error,
 		}
 	}()
 
+	go c.UpdateUserWSChannel()
+
 	return
 }
 
 // UpdateUserWSChannel PUT /api/v1/userDataStream
 func (c *Binance) UpdateUserWSChannel() {
-	c.client.do("PUT", userDataStreamUrl, "", false, nil)
+	for {
+		keepalive:= clientGoBinance.NewKeepaliveUserStreamService()
+		keepalive.ListenKey(keyUserData)
+		err := keepalive.Do(emptyContext{})
+		if err != nil {
+			fmt.Println("Binance error update userData stream: " + err.Error())
+			return
+		}
+
+		time.Sleep(time.Minute * 30)
+	}
 }
 
 // StopUserWSChannel DELETE /api/v1/userDataStream
-func (c *Binance) StopUserWSChannel() {
-	c.client.do("DELETE", userDataStreamUrl, "", false, nil)
+func (c *Binance) StopUserWSChannel() error {
+	if keyUserData != "" {
+		closeUserStream := clientGoBinance.NewCloseUserStreamService()
+		closeUserStream.ListenKey(keyUserData)
+		keyUserData = ""
+
+		return closeUserStream.Do(emptyContext{})
+	}
+
+	return nil
 }
 
 func getUserDataWSUrl(key string) string  {
