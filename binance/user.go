@@ -68,7 +68,7 @@ func (c *Binance) NewUserWSChannel() (err error,
 				continue
 			}
 
-			fmt.Printf("Binance ws recv: %s", string(b)) // TODO: Delete row
+			//fmt.Printf("Binance ws recv: %s", string(b)) // TODO: Delete row
 
 			accountUp := &WSAccountUpdate{}
 			err = json.Unmarshal(b, accountUp)

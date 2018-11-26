@@ -32,7 +32,7 @@ type WSAccountUpdate struct {
 
 type WSOrderUpdate struct {
 	EventType                              string          `json:"e"` // Event type
-	EventTime                              int32           `json:"E"` // Event time
+	EventTime                              int64           `json:"E"` // Event time
 	Symbol                                 string          `json:"s"` // Symbol
 	ClientOrderID                          string          `json:"c"` // Client order ID
 	Side                                   string          `json:"S"` // Side
@@ -42,7 +42,7 @@ type WSOrderUpdate struct {
 	OrderPrice                             decimal.Decimal `json:"p,string"` // Order price
 	StopPrice                              decimal.Decimal `json:"P,string"` // Stop price
 	IcebergQuantity                        decimal.Decimal `json:"F,string"` // Iceberg quantity
-	Ignore1                                int8            `json:"g"` // Ignore // TODO: maybe int32 ??
+	Ignore1                                int64            `json:"g"` // Ignore // TODO: maybe int32 ??
 	OriginalClientOrderID                  string          `json:"C"` // Original client order ID; This is the ID of the order being canceled
 	CurrentExecutionType                   string          `json:"x"` // Current execution type
 	// CurrentExecutionType:
@@ -59,14 +59,14 @@ type WSOrderUpdate struct {
 	CumulativeFilledQuantity               decimal.Decimal `json:"z,string"` // Cumulative filled quantity
 	LastExecutedPrice                      decimal.Decimal `json:"L,string"` // Last executed price
 	CommissionAmount                       decimal.Decimal `json:"n,string"` // Commission amount
-	CommissionAsset                        int32           `json:"N"` // Commission asset
-	TransactionTime                        int32           `json:"T"` // Transaction time
-	TradeID                                int32           `json:"t"` // Trade ID
-	Ignore2                                int32           `json:"I"` // Ignore
+	CommissionAsset                        *int64           `json:"N"` // Commission asset
+	TransactionTime                        int64           `json:"T"` // Transaction time
+	TradeID                                int64           `json:"t"` // Trade ID
+	Ignore2                                int64           `json:"I"` // Ignore
 	IsOrderWorking                         bool            `json:"w"` // Is the order working? Stops will have
 	IsTradeMakerSide                       bool            `json:"m"` // Is this trade the maker side?
 	Ignore3                                bool            `json:"M"` // Ignore
-	OrderCreationTime                      int32           `json:"O"` // Order creation time
+	OrderCreationTime                      int64           `json:"O"` // Order creation time
 	CumulativeQuoteAssetTransactedQuantity decimal.Decimal `json:"Z,string"` // Cumulative quote asset transacted quantity
 	LastQuoteAssetTransactedQuantity       decimal.Decimal `json:"Y,string"` // Last quote asset transacted quantity (i.e. lastPrice * lastQty)
 }
