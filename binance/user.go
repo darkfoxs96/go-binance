@@ -72,7 +72,7 @@ func (c *Binance) NewUserWSChannel() (err error,
 
 			accountUp := &WSAccountUpdate{}
 			err = json.Unmarshal(b, accountUp)
-			if err != nil {
+			if err != nil || accountUp.EventType == "executionReport" {
 				orderUp := &WSOrderUpdate{}
 				err = json.Unmarshal(b, orderUp)
 				if err != nil {
