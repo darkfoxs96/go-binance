@@ -59,7 +59,7 @@ type WSOrderUpdate struct {
 	CumulativeFilledQuantity               decimal.Decimal `json:"z,string"` // Cumulative filled quantity
 	LastExecutedPrice                      decimal.Decimal `json:"L,string"` // Last executed price
 	CommissionAmount                       decimal.Decimal `json:"n,string"` // Commission amount
-	CommissionAsset                        *int64           `json:"N"` // Commission asset
+	CommissionAsset                        *string           `json:"N"` // Commission asset
 	TransactionTime                        int64           `json:"T"` // Transaction time
 	TradeID                                int64           `json:"t"` // Trade ID
 	Ignore2                                int64           `json:"I"` // Ignore
