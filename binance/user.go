@@ -80,6 +80,7 @@ func (c *Binance) NewUserWSChannel() (err error,
 					return
 				}
 
+				//fmt.Printf("Binance ws recv: %s \n", string(b)) // TODO: Delete row
 				orderUpdate <- orderUp
 			} else {
 				accountUpdate <- accountUp

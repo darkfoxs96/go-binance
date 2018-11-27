@@ -8,6 +8,8 @@ package binance
 
 import (
 	"errors"
+
+	"github.com/shopspring/decimal"
 )
 
 // Input for: POST /api/v3/order
@@ -16,8 +18,8 @@ type LimitOrder struct {
 	Side        string
 	Type        string
 	TimeInForce string
-	Quantity    float64
-	Price       float64
+	Quantity    decimal.Decimal
+	Price       decimal.Decimal
 	RecvWindow  int64
 }
 
@@ -32,9 +34,9 @@ func (l *LimitOrder) ValidateLimitOrder() error {
 		return errors.New("Invalid LIMIT order type")
 	case !OrderTIFEnum[l.TimeInForce]:
 		return errors.New("Invalid or empty order timeInForce")
-	case l.Quantity <= 0.0:
+	case l.Quantity.IsZero():
 		return errors.New("Invalid or empty order quantity")
-	case l.Price <= 0.0:
+	case l.Price.IsZero():
 		return errors.New("Invalid or empty order price")
 	case l.RecvWindow == 0:
 		l.RecvWindow = 5000
