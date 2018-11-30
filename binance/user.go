@@ -67,7 +67,6 @@ func (c *Binance) NewUserWSChannel() (err error,
 				fmt.Println("Binance ws read: ", err)
 				continue
 			}
-
 			//fmt.Printf("Binance ws recv: %s \n", string(b)) // TODO: Delete row
 
 			accountUp := &WSAccountUpdate{}
@@ -80,10 +79,13 @@ func (c *Binance) NewUserWSChannel() (err error,
 					return
 				}
 
-				//fmt.Printf("Binance ws recv: %s \n", string(b)) // TODO: Delete row
-				orderUpdate <- orderUp
+				go func() {
+					orderUpdate <- orderUp
+				}()
 			} else {
-				accountUpdate <- accountUp
+				go func() {
+					accountUpdate <- accountUp
+				}()
 			}
 		}
 	}()

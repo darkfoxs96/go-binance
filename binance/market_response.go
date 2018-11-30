@@ -10,6 +10,8 @@ package binance
 import (
 	"encoding/json"
 	"strconv"
+
+	"github.com/shopspring/decimal"
 )
 
 // Result from: GET /api/v1/depth
@@ -86,11 +88,11 @@ type TickerPrice struct {
 
 // Result from: GET /api/v1/allBookTickers
 type BookTicker struct {
-	Symbol      string  `json:"symbol"`
-	BidPrice    float64 `json:"bidPrice,string"`
-	BidQuantity float64 `json:"bidQty,string"`
-	AskPrice    float64 `json:"askPrice,string"`
-	AskQuantity float64 `json:"askQty,string"`
+	Symbol      string  		`json:"symbol"`
+	BidPrice    decimal.Decimal `json:"bidPrice,string"`
+	BidQuantity decimal.Decimal `json:"bidQty,string"`
+	AskPrice    decimal.Decimal `json:"askPrice,string"`
+	AskQuantity decimal.Decimal `json:"askQty,string"`
 }
 
 // Result from: GET /api/v1/klines
