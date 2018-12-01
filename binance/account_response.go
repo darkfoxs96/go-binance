@@ -6,6 +6,10 @@
 
 package binance
 
+import (
+	"github.com/shopspring/decimal"
+)
+
 // Result from: GET /api/v3/account
 type Account struct {
 	MakerCommission  int64     `json:"makerCommission"`
@@ -19,9 +23,9 @@ type Account struct {
 }
 
 type Balance struct {
-	Asset  string  `json:"asset"`
-	Free   float64 `json:"free,string"`
-	Locked float64 `json:"locked,string"`
+	Asset  string
+	Free   decimal.Decimal
+	Locked decimal.Decimal
 }
 
 // Result from: POST /api/v3/order

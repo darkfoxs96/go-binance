@@ -8,6 +8,7 @@ package binance
 
 import (
 	"fmt"
+	"io/ioutil"
 )
 
 // Get Basic Account Information
@@ -24,27 +25,21 @@ func (b *Binance) GetAccountInfo() (account Account, err error) {
 }
 
 // Filter Basic Account Information To Retrieve Current Holdings
-func (b *Binance) GetPositions() (positions []Balance, err error) {
-
+func (b *Binance) GetPositions() (positions []*Balance, err error) {
 	reqUrl := fmt.Sprintf("api/v3/account")
-	account := Account{}
 
-	_, err = b.client.do("GET", reqUrl, "", true, &account)
+	resp, err := b.client.do("GET", reqUrl, "", true, nil)
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
 
-	positions = make([]Balance, len(account.Balances))
-	i := 0
-
-	for _, balance := range account.Balances {
-		if balance.Free != 0.0 || balance.Locked != 0.0 {
-			positions[i] = balance
-			i++
-		}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
 
-	return positions[:i], nil
+	return getBalanceByAccount(body), nil
 }
 
 // Place a Limit Order

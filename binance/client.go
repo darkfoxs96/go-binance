@@ -91,14 +91,19 @@ func (c *Client) do(method, resource, payload string, auth bool, result interfac
 	}
 
 	// Check for error
-	defer resp.Body.Close()
+	defer func() {
+		if result != nil {
+			resp.Body.Close()
+		}
+	}()
+
 	err = handleError(resp)
 	if err != nil {
 		return
 	}
 
 	// Process response
-	if resp != nil {
+	if resp != nil && result != nil {
 		decoder := json.NewDecoder(resp.Body)
 		err = decoder.Decode(result)
 	}

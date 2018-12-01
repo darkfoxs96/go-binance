@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"errors"
 	"time"
-	"encoding/json"
 
 	"github.com/gorilla/websocket"
 	goBinance "github.com/OlegFX/go-binance"
@@ -67,24 +66,14 @@ func (c *Binance) NewUserWSChannel() (err error,
 				fmt.Println("Binance ws read: ", err)
 				continue
 			}
-			//fmt.Printf("Binance ws recv: %s \n", string(b)) // TODO: Delete row
 
-			accountUp := &WSAccountUpdate{}
-			err = json.Unmarshal(b, accountUp)
-			if err != nil || accountUp.EventType == "executionReport" {
-				orderUp := &WSOrderUpdate{}
-				err = json.Unmarshal(b, orderUp)
-				if err != nil {
-					fmt.Printf("Binance ws read: not found structures, error: " + err.Error())
-					return
-				}
-
+			if isWSUpdateOrder(b) {
 				go func() {
-					orderUpdate <- orderUp
+					orderUpdate <- getWSUpdateOrder(b)
 				}()
 			} else {
 				go func() {
-					accountUpdate <- accountUp
+					accountUpdate <- getWSUpdateAccount(b)
 				}()
 			}
 		}
