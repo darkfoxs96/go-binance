@@ -95,10 +95,22 @@ type Withdraw struct {
 	Status    int64   `json:"status"`
 }
 
+type AssetDetail struct {
+	MinWithdrawAmount decimal.Decimal `json:"minWithdrawAmount"`
+	WithdrawFee       decimal.Decimal `json:"withdrawFee"`
+	DepositStatus     bool            `json:"depositStatus"`
+	WithdrawStatus    bool            `json:"withdrawStatus"`
+	DepositTip        string          `json:"depositTip"`
+}
+
 type WithdrawList struct {
 	Withdraws []Withdraw `json:"withdrawList"`
 }
 
 type DepositList struct {
 	Deposits []Deposit `json:"depositList"`
+}
+
+type AssetDetailList struct {
+	AssetDetail map[string]AssetDetail `json:"assetDetail"`
 }

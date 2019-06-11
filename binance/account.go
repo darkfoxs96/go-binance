@@ -197,3 +197,16 @@ func (b *Binance) GetDepositHistory() (deposits DepositList, err error) {
 	}
 	return
 }
+
+//
+// Retrieves all asset details
+func (b *Binance) GetAssetDetail() (assetDetail AssetDetailList, err error) {
+
+	reqUrl := fmt.Sprintf("wapi/v3/assetDetail.html")
+
+	_, err = b.client.do("GET", reqUrl, "", true, &assetDetail)
+	if err != nil {
+		return
+	}
+	return
+}
