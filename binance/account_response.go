@@ -34,6 +34,7 @@ type PlacedOrder struct {
 	OrderId       int64  `json:"orderId"`
 	ClientOrderId string `json:"clientOrderId"`
 	TransactTime  int64  `json:"transactTime"`
+	Status        string `json:"status"` // EXPIRED ...
 }
 
 // Result from: DELETE /api/v3/order

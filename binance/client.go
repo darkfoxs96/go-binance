@@ -24,8 +24,8 @@ type Client struct {
 }
 
 type BadRequest struct {
-	code int64  `json:"code"`
-	msg  string `json:"msg,required"`
+	Code int64  `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 func handleError(resp *http.Response) error {
@@ -35,6 +35,10 @@ func handleError(resp *http.Response) error {
 			return err
 		}
 
+		badReq := &BadRequest{}
+		if err = json.Unmarshal(body, badReq); err == nil {
+			return fmt.Errorf(badReq.Msg)
+		}
 		return fmt.Errorf("Bad response Status %s. Response Body: %s", resp.Status, string(body))
 	}
 	return nil
