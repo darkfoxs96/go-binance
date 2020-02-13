@@ -7,6 +7,9 @@
 package binance
 
 import (
+	"fmt"
+	"encoding/json"
+
 	"github.com/buger/jsonparser"
 	"github.com/shopspring/decimal"
 )
@@ -68,6 +71,12 @@ func getWSUpdateAccount(data []byte) *WSAccountUpdate  {
 
 func getWSUpdateOrder(data []byte) *WSOrderUpdate {
 	order := &WSOrderUpdate{}
+	err := json.Unmarshal(data, order)
+	if err != nil {
+		fmt.Println("getWSUpdateOrder():", err)
+	}
+
+	return order
 
 	jsonparser.EachKey(data, func(idx int, value []byte, vt jsonparser.ValueType, err error){
 		switch idx {

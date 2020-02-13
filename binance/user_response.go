@@ -25,17 +25,18 @@ type WSAccountUpdate struct {
 }
 
 type WSOrderUpdate struct {
-	//EventType                              string          `json:"e"` // Event type
+	EventType                              string          `json:"e"` // Event type
 	EventTime                              int64           `json:"E"` // Event time
 	Symbol                                 string          `json:"s"` // Symbol
 	//ClientOrderID                          string          `json:"c"` // Client order ID
 	Side                                   string          `json:"S"` // Side
 	OrderType                              string          `json:"o"` // Order type
-	//TimeInForce                            string          `json:"f"` // Time in force
-	OrderQuantity                          decimal.Decimal `json:"q,string"` // Order quantity
-	OrderPrice                             decimal.Decimal `json:"p,string"` // Order price
-	StopPrice                              decimal.Decimal `json:"P,string"` // Stop price
-	IcebergQuantity                        decimal.Decimal `json:"F,string"` // Iceberg quantity
+	TimeInForce                            string          `json:"f"` // Time in force
+	OrderQuantity                          decimal.Decimal `json:"q"` // Order quantity
+	Q                          			   decimal.Decimal `json:"Q"`
+	OrderPrice                             decimal.Decimal `json:"p"` // Order price
+	StopPrice                              decimal.Decimal `json:"P"` // Stop price
+	IcebergQuantity                        decimal.Decimal `json:"F"` // Iceberg quantity
 	//Ignore1                                int64            `json:"g"` // Ignore // TODO: maybe int32 ??
 	//OriginalClientOrderID                  string          `json:"C"` // Original client order ID; This is the ID of the order being canceled
 	CurrentExecutionType                   string          `json:"x"` // Current execution type
@@ -49,18 +50,18 @@ type WSOrderUpdate struct {
 	CurrentOrderStatus                     string          `json:"X"` // Current order status
 	//OrderRejectReason                      string          `json:"r"` // Order reject reason; will be an error code.
 	OrderID                                int64           `json:"i"` // Order ID
-	LastExecutedQuantity                   decimal.Decimal `json:"l,string"` // Last executed quantity
-	CumulativeFilledQuantity               decimal.Decimal `json:"z,string"` // Cumulative filled quantity
-	LastExecutedPrice                      decimal.Decimal `json:"L,string"` // Last executed price
-	CommissionAmount                       decimal.Decimal `json:"n,string"` // Commission amount
-	//CommissionAsset                        *string           `json:"N"` // Commission asset
+	LastExecutedQuantity                   decimal.Decimal `json:"l"` // Last executed quantity
+	CumulativeFilledQuantity               decimal.Decimal `json:"z"` // Cumulative filled quantity
+	LastExecutedPrice                      decimal.Decimal `json:"L"` // Last executed price
+	CommissionAmount                       decimal.Decimal `json:"n"` // Commission amount
+	CommissionAsset                        *string           `json:"N"` // Commission asset
 	TransactionTime                        int64           `json:"T"` // Transaction time
-	//TradeID                                int64           `json:"t"` // Trade ID
-	//Ignore2                                int64           `json:"I"` // Ignore
+	TradeID                                int64           `json:"t"` // Trade ID
+	Ignore2                                int64           `json:"I"` // Ignore
 	IsOrderWorking                         bool            `json:"w"` // Is the order working? Stops will have
 	//IsTradeMakerSide                       bool            `json:"m"` // Is this trade the maker side?
 	//Ignore3                                bool            `json:"M"` // Ignore
 	OrderCreationTime                      int64           `json:"O"` // Order creation time
-	CumulativeQuoteAssetTransactedQuantity decimal.Decimal `json:"Z,string"` // Cumulative quote asset transacted quantity
-	LastQuoteAssetTransactedQuantity       decimal.Decimal `json:"Y,string"` // Last quote asset transacted quantity (i.e. lastPrice * lastQty)
+	CumulativeQuoteAssetTransactedQuantity decimal.Decimal `json:"Z"` // Cumulative quote asset transacted quantity
+	LastQuoteAssetTransactedQuantity       decimal.Decimal `json:"Y"` // Last quote asset transacted quantity (i.e. lastPrice * lastQty)
 }
