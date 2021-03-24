@@ -9,6 +9,7 @@ package binance
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	goBinance "github.com/OlegFX/go-binance"
@@ -18,6 +19,50 @@ import (
 const (
 	userDataWSUrl = "wss://stream.binance.com:9443/ws/"
 )
+
+type DoneChannel struct {
+	ch       chan interface{}
+	isClosed bool
+	mutex    sync.RWMutex
+}
+
+func (d DoneChannel) IsClosed() bool {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+	return d.isClosed
+}
+
+func (d DoneChannel) Write(data interface{}) bool {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+	if d.isClosed {
+		return false
+	}
+
+	d.ch <- data
+	return true
+}
+
+func (d DoneChannel) Read() <-chan interface{} {
+	return d.ch
+}
+
+func (d DoneChannel) Close() {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+	if d.isClosed {
+		return
+	}
+
+	d.isClosed = true
+	close(d.ch)
+}
+
+func NewDoneChannel() *DoneChannel {
+	return &DoneChannel{
+		ch: make(chan interface{}, 2),
+	}
+}
 
 var (
 	keyUserData       = ""
@@ -29,13 +74,13 @@ var (
 func (c *Binance) NewUserWSChannel() (err error,
 	accountUpdate chan *WSAccountUpdate,
 	orderUpdate chan *WSOrderUpdate,
-	done chan struct{}) {
+	done *DoneChannel) {
 	clientGoBinance = goBinance.NewClient(c.client.key, c.client.secret)
 	clientGoBinanceWS := clientGoBinance.NewStartUserStreamService()
 
 	keyUserData, err = clientGoBinanceWS.Do(emptyContext{})
 	if err != nil {
-		fmt.Println("Binance WS clientGoBinanceWS.Do(emptyContext{}) ERROR: ", err)
+		return errors.New("Binance WS clientGoBinanceWS.Do(emptyContext{}) ERROR: " + err.Error()), nil, nil, nil
 	}
 	if keyUserData == "" {
 		return errors.New("Binance WS ERROR: key for ws user data == nil"), nil, nil, nil
@@ -46,55 +91,59 @@ func (c *Binance) NewUserWSChannel() (err error,
 		return
 	}
 
-	done = make(chan struct{}, 2)
-	accountUpdate = make(chan *WSAccountUpdate, 10)
-	orderUpdate = make(chan *WSOrderUpdate, 10)
+	done = NewDoneChannel()
+	accountUpdate = make(chan *WSAccountUpdate, 50)
+	orderUpdate = make(chan *WSOrderUpdate, 50)
 
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
+				done.Write(r)
 			}
 
-			close(done)
+			done.Close()
 			close(accountUpdate)
 			close(orderUpdate)
 			c.StopUserWSChannel()
 		}()
 
-		fmt.Println("Binance start userData stream =>>>>>>")
-
 		for {
 			_, b, err := conn.ReadMessage()
 			if err != nil {
-				fmt.Println("Binance ws read: ", err)
+				done.Write(err)
 				break
 			}
 
 			if isWSUpdateOrder(b) {
 				go func() {
-					orderUpdate <- getWSUpdateOrder(b)
+					if data := getWSUpdateOrder(b); !done.IsClosed() {
+						orderUpdate <- data
+					}
 				}()
 			} else {
 				go func() {
-					accountUpdate <- getWSUpdateAccount(b)
+					if data := getWSUpdateAccount(b); !done.IsClosed() {
+						accountUpdate <- data
+					}
 				}()
 			}
 		}
 	}()
 
-	go c.UpdateUserWSChannel()
+	go c.UpdateUserWSChannel(done)
 
 	return
 }
 
 // UpdateUserWSChannel PUT /api/v1/userDataStream
-func (c *Binance) UpdateUserWSChannel() {
+func (c *Binance) UpdateUserWSChannel(done *DoneChannel) {
 	for {
 		keepalive := clientGoBinance.NewKeepaliveUserStreamService()
 		keepalive.ListenKey(keyUserData)
 		err := keepalive.Do(emptyContext{})
 		if err != nil {
-			fmt.Println("Binance error update userData stream: " + err.Error())
+			done.Write(errors.New("Binance error update userData stream: " + err.Error()))
+			done.Close()
 			return
 		}
 
