@@ -115,17 +115,13 @@ func (c *Binance) NewUserWSChannel() (err error,
 			}
 
 			if isWSUpdateOrder(b) {
-				go func() {
-					if data := getWSUpdateOrder(b); !done.IsClosed() {
-						orderUpdate <- data
-					}
-				}()
+				if data := getWSUpdateOrder(b); !done.IsClosed() {
+					orderUpdate <- data
+				}
 			} else {
-				go func() {
-					if data := getWSUpdateAccount(b); !done.IsClosed() {
-						accountUpdate <- data
-					}
-				}()
+				if data := getWSUpdateAccount(b); !done.IsClosed() {
+					accountUpdate <- data
+				}
 			}
 		}
 	}()
