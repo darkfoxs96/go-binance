@@ -47,7 +47,7 @@ func (d DoneChannel) Read() <-chan interface{} {
 	return d.ch
 }
 
-func (d DoneChannel) Close() {
+func (d *DoneChannel) Close() {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	if d.isClosed {
